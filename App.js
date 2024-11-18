@@ -17,7 +17,7 @@ const App = () => {
             "x-rapidapi-key": apiKey, // Lisää API-avaimesi tähän
           },
         });
-        console.log(process.env);
+        console.log('Test Variable:', process.env.REACT_APP_TEST_VAR);
         setData(response.data); // Tallenna API:n vastaus
         setLoading(false);
       } catch (err) {
