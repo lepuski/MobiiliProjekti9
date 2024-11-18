@@ -5,7 +5,7 @@ const App = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiKey = `"${process.env.REACT_APP_API_KEY}"`;
+  const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
   useEffect(() => {
     // Testataan API-kutsu ilman parametrejä
@@ -17,7 +17,7 @@ const App = () => {
             "x-rapidapi-key": apiKey, // Lisää API-avaimesi tähän
           },
         });
-        console.log('Test Variable:', process.env.REACT_APP_TEST_VAR);
+        console.log('All Environment Variables:', process.env);
         setData(response.data); // Tallenna API:n vastaus
         setLoading(false);
       } catch (err) {
