@@ -17,7 +17,6 @@ const App = () => {
             "x-rapidapi-key": apiKey, // Lisää API-avaimesi tähän
           },
         });
-        console.log('All Environment Variables:', process.env);
         setData(response.data); // Tallenna API:n vastaus
         setLoading(false);
       } catch (err) {
