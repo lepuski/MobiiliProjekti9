@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { StyleSheet, View, Text, Button } from 'react-native';
+import Login from './components/login';
 
 const App = () => {
   const [data, setData] = useState(null);
@@ -27,15 +29,20 @@ const App = () => {
 
     fetchData();
   }, []);
+  
 
-  if (loading) return <p>Ladataan...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <Text>Ladataan...</Text>;
+  if (error) return <Text>{error}</Text>;
 
-  return (
-    <div>
-      <h1>API-Football Testeri</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre> {/* Näytetään raakadata */}
-    </div>
+  return (    
+    <>
+      <Register></Register>
+      <Text>
+      <Text>API-Football Testeri</Text>
+      <Text>{JSON.stringify(data, null, 2)}</Text> {/* Näytetään raakadata */}
+      </Text>
+    </>
+
   );
 };
 
