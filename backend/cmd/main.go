@@ -1,54 +1,74 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"database/sql"
 	"flag"
+	"github.com/alexedwards/scs/mysqlstore" // New import
+	"github.com/alexedwards/scs/v2"
+	_ "github.com/go-sql-driver/mysql"
+	"log/slog"
+	"net/http"
 	"os"
+	"time"
 )
 
-//create an application struct for dependency injection
-type application struct{
-	errorLog 	*log.Logger
-	infoLog		*log.Logger
+// create an application struct for dependency injection
+type application struct {
+	logger         *slog.Logger
+	sessionManager *scs.SessionManager
 }
 
 func main() {
 
-	
 	//change port by specifying a flag when running main.go
 	addr := flag.String("addr", ":4000", "HTTP network address")
+	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
+	//create a new custom logger
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	//create a new custom logger 
-	infoLog := log.New(os.Stdout, "INFO \t", log.Ldate | log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR \t", log.Ldate | log.Ltime | log.Lshortfile)
+	//open a DB connection
+	db, err := openDB(*dsn)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	defer db.Close()
 
-	//init a new application struct that contains the required dependencies 
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
+	//init a new application struct that contains the required dependencies
 	app := &application{
-		errorLog: errorLog,
-		infoLog: infoLog,
+		logger: logger,
+		sessionManager: sessionManager,
 	}
 
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("GET /register", app.register)
-	mux.HandleFunc("POST /register", app.handleRegistration)
-	mux.HandleFunc("GET /snippet", app.showUser)
-
-	fileServer := http.FileServer(http.Dir("./static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-
-	//create a new customized http.server that uses the custom logger created above
 	srv := &http.Server{
 		Addr: *addr,
-		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler: app.routes(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
-	infoLog.Println("Starting server on %s", *addr)
-	err := srv.ListenAndServe()
-	errorLog.Fatal(err)
+	logger.Info("Starting server on %s", srv.Addr)
+
+	err = srv.ListenAndServe()
+	logger.Error(err.Error())
+	os.Exit(1)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
 }
