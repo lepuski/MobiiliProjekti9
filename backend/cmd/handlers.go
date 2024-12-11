@@ -10,7 +10,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
-	
+
 	}
 
 	app.sessionManager.Put(r.Context(), "message", "Hello from a session!")
@@ -31,7 +31,12 @@ func (app *application) userRegister(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Display a form for signing up a new user...")
 }
 func (app *application) userRegisterPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Create a new user...")
+	var input struct {
+		Name      string `json:"name"`
+		Password  string `json:"password1"`
+		Password2 string `json:"password2"`
+	}
+	err := app.readJSON()
 }
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Display a form for logging in a user...")

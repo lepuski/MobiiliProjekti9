@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { StyleSheet, View, Text, Button } from 'react-native';
-import Login from './components/login';
+import Register from './components/register';
 
 const App = () => {
   const [data, setData] = useState(null);

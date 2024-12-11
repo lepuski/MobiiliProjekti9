@@ -7,7 +7,6 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", app.home)
-	
 
 	mux.HandleFunc("GET /user/register", app.userRegister)
 	mux.HandleFunc("POST /user/register", app.userRegisterPost)

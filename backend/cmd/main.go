@@ -3,19 +3,22 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"github.com/alexedwards/scs/mysqlstore" // New import
-	"github.com/alexedwards/scs/v2"
-	_ "github.com/go-sql-driver/mysql"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/JoonaTuohimaa/MobiiliProjekti9/internal/models"
+	"github.com/alexedwards/scs/mysqlstore" // New import
+	"github.com/alexedwards/scs/v2"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // create an application struct for dependency injection
 type application struct {
 	logger         *slog.Logger
 	sessionManager *scs.SessionManager
+	users          *models.UserModel
 }
 
 func main() {
@@ -41,13 +44,14 @@ func main() {
 
 	//init a new application struct that contains the required dependencies
 	app := &application{
-		logger: logger,
+		logger:         logger,
 		sessionManager: sessionManager,
+		users:          &models.UserModel{DB: db},
 	}
 
 	srv := &http.Server{
-		Addr: *addr,
-		Handler: app.routes(),
+		Addr:     *addr,
+		Handler:  app.routes(),
 		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
